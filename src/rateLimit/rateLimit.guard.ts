@@ -11,7 +11,8 @@ export class RateLimiterGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const key = request.ip; // Unique key (e.g., user IP or ID)
+    const key = `${request.ip}:${request.url}`; 
+
     const customLimit = this.reflector.get<{ points: number; duration: number }>(
       'rateLimit',
       context.getHandler(),
@@ -19,12 +20,11 @@ export class RateLimiterGuard implements CanActivate {
 
     if (customLimit) {
       const { points, duration } = customLimit;
-      await this.rateLimiterService.limit(key, points, duration);
+      const isAllowed: any = await this.rateLimiterService.limit(key, points, duration);
+      return isAllowed;
     } else {
-      // Default rate limit (optional)
-      await this.rateLimiterService.limit(key, 10, 60);
+      const isAllowed: any = await this.rateLimiterService.limit(key, 10, 60);
+      return isAllowed; 
     }
-
-    return true;
   }
 }

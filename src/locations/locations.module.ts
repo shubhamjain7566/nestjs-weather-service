@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LocationsService } from './locations.service';
 import { LocationsController } from './locations.controller';
-import { UserFavoriteLocations } from './entities/userFavoriteLocations.entity';
-import { Locations } from './entities/locations.entity';
+import { UserFavoriteLocations } from './entity/userFavoriteLocations.entity';
+import { Locations } from './entity/locations.entity';
 import { CustomLogger } from '../logger.service'
 import { RateLimiterService } from '../rateLimit/rateLimit.service';
 import { CacheModule } from '@nestjs/cache-manager';
-import { redisConfig } from '../config/redis.config'; // Import the redis configuration
+import { redisConfig } from '../cache/redis.config';
 
 @Module({
   imports: [

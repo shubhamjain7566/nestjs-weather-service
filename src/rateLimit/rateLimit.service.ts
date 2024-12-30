@@ -1,34 +1,45 @@
-import { Injectable, Inject, HttpException, HttpStatus } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { RateLimiterRedis } from 'rate-limiter-flexible';
-import { Cache } from 'cache-manager';
-import { Redis } from 'ioredis';
+import { Injectable, Inject } from '@nestjs/common';
+import { Cache } from 'cache-manager'; 
+import { CACHE_MANAGER } from '@nestjs/cache-manager'; 
 
 @Injectable()
 export class RateLimiterService {
-  private rateLimiter: RateLimiterRedis;
+  constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
 
-  constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {
-    const redisClient = (this.cacheManager.store as any).getClient() as Redis;
+  async limit(key: string, points: number, duration: number): Promise<boolean> {
+    const currentTime = Date.now();
+    const bucketKey = `rateLimit:${key}`;  // Unique key for each IP + URL pair
 
-    this.rateLimiter = new RateLimiterRedis({
-      storeClient: redisClient,
-    });
-  }
+    const bucket: any = await this.cache.get(bucketKey);
 
-  async limit(key: string, points: number, duration: number): Promise<void> {
-    try {
-      const limiter = new RateLimiterRedis({
-        storeClient: (this.cacheManager.store as any).getClient() as Redis,
-        points, // Custom points
-        duration, // Custom duration
-      });
-      await limiter.consume(key);
-    } catch (err) {
-      throw new HttpException(
-        'Too many requests',
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
+    if (!bucket) {
+      const newBucket = {
+        tokens: points,
+        lastRefillTime: currentTime,
+      };
+      await this.cache.set(bucketKey, newBucket, duration );
+      return true; 
+    }
+
+    const { tokens, lastRefillTime } = bucket;
+
+    const elapsedTime = currentTime - lastRefillTime;
+    
+    const refillRate = points / duration;
+    const newTokens = Math.min(
+      points,
+      tokens + Math.floor(elapsedTime / 1000) * refillRate 
+    );
+
+    if (newTokens > 0) {
+      const updatedBucket = {
+        tokens: newTokens - 1, 
+        lastRefillTime: currentTime,
+      };
+      await this.cache.set(bucketKey, updatedBucket, duration );
+      return true;
+    } else {
+      return false;
     }
   }
 }

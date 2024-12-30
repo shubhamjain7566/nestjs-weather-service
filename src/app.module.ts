@@ -10,8 +10,11 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
-import { redisConfig } from './config/redis.config';
+import { redisConfig } from './cache/redis.config';
 import { RateLimiterService } from './rateLimit/rateLimit.service';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { GraphQLModule } from '@nestjs/graphql';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -36,6 +39,14 @@ import { RateLimiterService } from './rateLimit/rateLimit.service';
       url: process.env.DATABASE_URL, 
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
+    }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      formatError: (error) => {
+        const { message, locations, path } = error;
+        return { message, locations, path };
+      },
     }),
     PassportModule,
     LocationsModule,

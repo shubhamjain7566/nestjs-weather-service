@@ -1,17 +1,15 @@
-// src/auth/auth.service.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable, UnauthorizedException, UseGuards } from '@nestjs/common';import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
-import { ConfigService } from '@nestjs/config';
+import { RateLimiterGuard } from '../rateLimit/rateLimit.guard';
 
+@UseGuards(RateLimiterGuard)
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UserService,
     private jwtService: JwtService,
-    private configService: ConfigService,
   ) {}
 
   async login(loginDto: LoginDto) {

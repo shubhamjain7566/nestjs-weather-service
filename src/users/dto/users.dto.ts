@@ -1,18 +1,30 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { Exclude } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger'; 
+import { IsNotEmpty, IsString, IsEmail } from 'class-validator'; 
 
-@Entity()
 export class CreateUserDto {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
+  
+  @ApiProperty({
+    description: 'The name of the user',
+    example: 'John Doe',  
+  })
+  @IsNotEmpty()
+  @IsString()
   name: string;
 
-  @Column({ unique: true })
+  @ApiProperty({
+    description: 'The username of the user (should be unique)',
+    example: 'johndoe123',  
+  })
+  @IsNotEmpty()
+  @IsString()
+  @IsEmail() 
   userName: string;
 
-  @Exclude() // Exclude the password from serialization
-  @Column()
-  password: string; // In a real application, make sure to hash passwords!
+  @ApiProperty({
+    description: 'Password for the user account',
+    example: 'password123',  
+  })
+  @IsNotEmpty()
+  @IsString()
+  password: string;
 }

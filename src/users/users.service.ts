@@ -1,7 +1,7 @@
 import { Injectable, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Users } from './entities/users.entity';
+import { Users } from './entity/users.entity';
 import { CreateUserDto } from './dto/users.dto';
 import * as bcrypt from 'bcrypt';
 import { CustomLogger } from '../logger.service';
@@ -31,7 +31,6 @@ export class UserService {
         this.logger.warn(`Username already exists: ${createUserDto.userName}`);
         throw new ConflictException('Username already exists');
       }
-      // Handle other database errors
       throw error;
     }
   }

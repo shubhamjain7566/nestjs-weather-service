@@ -1,12 +1,18 @@
-// src/dto/user-favorite-locations.dto.ts
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsNotEmpty } from 'class-validator';
 
 export class UserFavoriteLocationsDto {
+  @ApiProperty({
+    example: 1,
+  })
   @IsNumber()
   @IsNotEmpty()
-  cityId: number; // Reference to the Locations entity
+  cityId: number;
 
+  @ApiProperty({
+    example: 1,
+  })
   @IsNumber()
   @IsNotEmpty()
-  userId: number; // Reference to the User entity
+  userId: number;
 }
