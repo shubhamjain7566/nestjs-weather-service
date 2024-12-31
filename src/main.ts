@@ -14,7 +14,6 @@ async function startApplication() {
     .setDescription('API description for the project')
     .setVersion('1.0') 
     .addBearerAuth() 
-    .addTag('weather-api')
     .build();
 
   // Generate the Swagger document

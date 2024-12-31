@@ -192,6 +192,7 @@ export class WeatherService {
       };
 
       await this.cacheManager.set(cacheKey, response, this.calculateTTL());
+      return response;
     } catch(error){
       this.logger.error(`Failed in getCacheAndSaveWeather: ${error.message}`);
       throw error;
